@@ -1,11 +1,28 @@
-from replit import clear as clearOut
+import pygame
 import math, copy
-#from helper import
+from helper import print2, getPrint
 
+pygame.font.init()
 
-class grapics():
-
-    def __init__(self, width, hight):
+scale = 23.7*2
+class grapics:
+    def __init__(
+        self,
+        width,
+        hight,
+        name,
+        backgroundColour=(0, 0, 0),
+        font=pygame.font.Font("DejavuSansMono-5m7L.ttf", 40),
+        textColor=(255, 255, 255),
+    ):
+        self.screen = pygame.display.set_mode(
+            (width * 30, hight * 30), pygame.RESIZABLE
+        )
+        self.screen.fill(backgroundColour)
+        pygame.display.set_caption(name)
+        self.textFont = font
+        self.textColor = textColor
+        self.backgroundColour = backgroundColour
         self.width = width
         self.hight = hight
         self.display = self.makeBlankDisplay()
@@ -20,10 +37,6 @@ class grapics():
                 self.display[i].append(" ")
             del self.display[i][self.width * 2 - 1]
 
-    def resetScreen(self):
-        clearOut()
-        self.makeBlankDisplay()
-
     def makeBlankDisplay(self):
         twoDArray = []
         for i in range(self.hight):
@@ -35,17 +48,29 @@ class grapics():
         return twoDArray
 
     def displayToScreen(self):
-        print('\x1b[2K')
-        print('\033[1A' * (len(self.display) + 3), end='')
         for array in self.display:
             string = ""
             for char in array:
                 string = string + str(char)
-            print('\x1b[2K', end='')
-            print(string)
-        print('\x1b[2K')
-        print('\x1b[2K', end='')
-        print('\x1b[2K', end='')
+            print2(string)
+        img = pygame.Surface((self.width * scale, self.hight * scale))
+        img.fill(self.backgroundColour)
+        texts = getPrint()
+        for i in range(len(texts)):
+            text = self.textFont.render(texts[i], True, self.textColor)
+            img.blit(text, (1, 1 + (i * self.textFont.get_height())))
+        windowSize = pygame.display.get_surface().get_size()
+        windowSize = self.screen.get_size()
+        aspectRatio = self.width / self.hight
+        if windowSize[0] / windowSize[1] > aspectRatio:
+            newWindowSize = (self.width / self.hight * windowSize[1], windowSize[1])
+            pos = (int((windowSize[0] - newWindowSize[0])/2), 0)
+        else:
+            newWindowSize = (windowSize[0], windowSize[0] / (self.width / self.hight))
+            pos = (0, int((windowSize[1] - newWindowSize[1])/2))
+        img = pygame.transform.scale(img, newWindowSize)
+        self.screen.blit(img, pos)
+        pygame.display.update()
 
     def addBox(self, x1, x2, y1, y2, filler, lineEdge):
         x1 = math.floor(x1)
@@ -92,8 +117,8 @@ class grapics():
                 if shift >= abs(x2 - x1) * 2 - 5:
                     shift = 0
                     break
-            self.addText(x1 + 1, y1 + 1 + line, text[0:abs(x2 - x1) * 2 - 5 - shift])
-            text = text[abs(x2 - x1) * 2 - 4 - shift:len(text)]
+            self.addText(x1 + 1, y1 + 1 + line, text[0 : abs(x2 - x1) * 2 - 5 - shift])
+            text = text[abs(x2 - x1) * 2 - 4 - shift : len(text)]
             line += 1
 
     def addImage(self, x, y, image):
@@ -108,4 +133,4 @@ class grapics():
             self.display = 0
             self.display = copy.deepcopy(self.saves[saveName])
         else:
-            print("could not find save: " + saveName)
+            print2("could not find save: " + saveName)

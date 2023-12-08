@@ -1,5 +1,5 @@
 import worlds, copy
-from getkey import keys
+import pygame
 
 # dont replace char: '☓'
 objects = [[],[
@@ -97,34 +97,35 @@ class world():
                     self.world[y][x] = 0
                     self.world[y1][x1] = 12
 
-    def process(self, game, key):
+    def process(self, game):
         if [self.playerX, self.playerY] == self.winLoc:
             return self.winLevel(game)
         game.grapics.load("background")
-        if key != "none":
-            y = 0
-            x = 0
-            if key == 'w' or key == keys.UP:
-                y = -1
-                self.rotation = 1
-            elif key == 's' or key == keys.DOWN:
-                y = 1
-                self.rotation = 3
-            elif key == 'a' or key == keys.LEFT:
-                x = -1
-                self.rotation = 2
-            elif key == 'd' or key == keys.RIGHT:
-                x = 1
-                self.rotation = 0
-            elif key == 'l':
-                return self.leaveLevel(game)
-            elif key == 'r':
-                return world(game, self.worldNumber)
-            if x != 0 or y != 0:
-                if self.checkMove(self.playerX, self.playerY, x, y):
-                    self.playerX += x
-                    self.playerY += y
-                    self.world[self.playerY][self.playerX] = 0
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                y = 0
+                x = 0
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
+                    y = -1
+                    self.rotation = 1
+                elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                    y = 1
+                    self.rotation = 3
+                elif event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    x = -1
+                    self.rotation = 2
+                elif event.key== pygame.K_d or event.key == pygame.K_RIGHT:
+                    x = 1
+                    self.rotation = 0
+                elif event.key == pygame.K_l:
+                    return self.leaveLevel(game)
+                elif event.key == pygame.K_r:
+                    return world(game, self.worldNumber)
+                if x != 0 or y != 0:
+                    if self.checkMove(self.playerX, self.playerY, x, y):
+                        self.playerX += x
+                        self.playerY += y
+                        self.world[self.playerY][self.playerX] = 0
         game.grapics.addImage(4 + 3 * self.winLoc[0], 3 + 3 * self.winLoc[1], objects[11])
         self.checkDoors(game)
         self.displayWorld(game)
@@ -210,7 +211,8 @@ class world():
         ], "tile"])
 
     def winLevel(self, game):
-        game.completedLevels.append(self.worldNumber)
+        if self.worldNumber not in game.completedLevels:
+            game.completedLevels.append(self.worldNumber)
         return self.leaveLevel(game)
 
     def findInWorld(self, toFind):

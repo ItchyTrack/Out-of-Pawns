@@ -1,3 +1,5 @@
+import pygame
+
 # dont replace char: '☓'
 characters = [[
     "{>₋>}",
@@ -63,17 +65,21 @@ class dialogScene():
         self.nextText(game)
         
 
-    def process(self, game, key):
+    def process(self, game):
         game.grapics.load("background")
-        if key != "none":
-            if key == "s":
-                game.openMenu()
-                return
+        key = False
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key = True
+                if event.key == pygame.K_s:
+                    game.openMenu()
+                    return
+        if key:
             self.line += 1
             if self.line >= len(self.dialog):
                 game.openMenu()
                 return
-            self.nextText(game)
+        self.nextText(game)
         if self.dialog[self.line][1]:
             game.grapics.addImage(3, 20, characters[self.dialog[self.line][0]+self.i])
         else:
