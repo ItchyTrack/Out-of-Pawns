@@ -1,4 +1,3 @@
-from time import time
 from editor import game
 import pygame
 import asyncio
